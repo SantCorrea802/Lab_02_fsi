@@ -1,0 +1,41 @@
+# Compilación y herramientas
+target/
+.m2/
+.idea/
+.vscode/
+*.iml
+.settings/
+.project
+.classpath
+
+# Archivos locales y secretos
+.env
+.env.*
+!.env.example
+application-local.properties
+application-local.yml
+application-local.yaml
+application-secret.*
+application-secrets.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials.json
+*.log
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+Thumbs.db
+.DS_Store
+
+# Material entregado por el profesor (no publicar)
+material/
+
+/evidencias/
+
+evidencias/

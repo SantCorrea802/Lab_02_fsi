@@ -1,0 +1,19 @@
+{
+  "flight": {
+    "id": "AV-101",
+    "delayMinutes": 181,
+    "durationMinutes": 301
+  },
+  "passenger": {
+    "id": "P1",
+    "age": 30,
+    "membership": "Platinum",
+    "luggageKg": 24,
+    "seatPreference": "Any",
+    "travelingWithChildren": false,
+    "loyaltyPoints": 100
+  },
+  "seats": [
+    { "id": "E1", "type": "EMERGENCY_EXIT", "occupied": false }
+  ]
+}

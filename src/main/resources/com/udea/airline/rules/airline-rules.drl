@@ -1,0 +1,113 @@
+package com.udea.airline.rules
+
+import java.math.BigDecimal
+import com.udea.airline.rules.FlightFact
+import com.udea.airline.rules.PassengerFact
+import com.udea.airline.rules.PassengerDecision
+import com.udea.airline.rules.SeatInventory
+
+rule "UpgradeToBusinessClassForFrequentFlyersWithDelays"
+when
+    $p : PassengerFact(membership == "Gold" || membership == "Platinum")
+    FlightFact(delayMinutes > 60)
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.requestBusinessUpgrade();
+    $d.recordRule("UpgradeToBusinessClassForFrequentFlyersWithDelays");
+end
+
+rule "PriorityCheckInForSeniors"
+when
+    $p : PassengerFact(age > 65)
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.setPriorityCheckIn(true);
+    $d.recordRule("PriorityCheckInForSeniors");
+end
+
+rule "DiscountForLightLuggage"
+when
+    $p : PassengerFact(luggageKg < 10)
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.setDiscountPercent(10);
+    $d.recordRule("DiscountForLightLuggage");
+end
+
+rule "DenyUpgradeForOverweightLuggage"
+when
+    $p : PassengerFact(luggageKg > 23)
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.denyBusinessUpgrade();
+    $d.recordRule("DenyUpgradeForOverweightLuggage");
+end
+
+// Prioridad explícita: primero todos los asientos familiares y luego los de
+// emergencia. En cada grupo se atiende el orden de pasajeros de la solicitud.
+rule "AssignEmergencyExitSeatToYoungAdults"
+salience(10000 - $order)
+when
+    $p : PassengerFact($order : order, age >= 18, age <= 40, seatPreference == "Any")
+    $inventory : SeatInventory(availableEmergencySeat == true)
+    $d : PassengerDecision(passengerId == $p.id, assignedSeatId == null, emergencySeatRequested == false)
+then
+    $d.setEmergencySeatRequested(true);
+    $d.assignSeat($inventory.reserveEmergencySeat($p.getId()), "EMERGENCY_EXIT");
+    $d.recordRule("AssignEmergencyExitSeatToYoungAdults");
+    update($d);
+    update($inventory);
+end
+
+rule "CompensationForExtremeDelays"
+when
+    FlightFact(delayMinutes > 180)
+    $p : PassengerFact()
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.setCompensationAmount(new BigDecimal("200"));
+    $d.recordRule("CompensationForExtremeDelays");
+end
+
+rule "ExtraLoyaltyPointsForLongFlights"
+when
+    FlightFact(durationMinutes > 300)
+    $p : PassengerFact(membership != "Basic")
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.setLoyaltyPointsAwarded(500);
+    $d.recordRule("ExtraLoyaltyPointsForLongFlights");
+end
+
+rule "RestrictLuggageOnShortFlights"
+when
+    FlightFact(durationMinutes < 120)
+    $p : PassengerFact(luggageKg > 15)
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.setLuggageAllowed(false);
+    $d.recordRule("RestrictLuggageOnShortFlights");
+end
+
+rule "VipLoungeAccessForPlatinumMembers"
+when
+    $p : PassengerFact(membership == "Platinum")
+    $d : PassengerDecision(passengerId == $p.id)
+then
+    $d.setVipLoungeAccess(true);
+    $d.recordRule("VipLoungeAccessForPlatinumMembers");
+end
+
+rule "PreferentialSeatForFamilies"
+salience(20000 - $order)
+when
+    $p : PassengerFact($order : order, travelingWithChildren == true, seatPreference == "Any")
+    $inventory : SeatInventory()
+    $d : PassengerDecision(passengerId == $p.id, familySeatRequested == false)
+then
+    $d.setFamilySeatRequested(true);
+    $d.assignSeat($inventory.reserveFamilySeat($p.getId()), "FAMILY");
+    $d.recordRule("PreferentialSeatForFamilies");
+    update($d);
+    update($inventory);
+end

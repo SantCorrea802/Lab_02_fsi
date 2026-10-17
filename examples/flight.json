@@ -1,0 +1,31 @@
+{
+  "flight": {
+    "id": "AV-202",
+    "delayMinutes": 61,
+    "durationMinutes": 180
+  },
+  "passengers": [
+    {
+      "id": "FAMILIA",
+      "age": 30,
+      "membership": "Gold",
+      "luggageKg": 9,
+      "seatPreference": "Any",
+      "travelingWithChildren": true,
+      "loyaltyPoints": 0
+    },
+    {
+      "id": "INDIVIDUAL",
+      "age": 25,
+      "membership": "Basic",
+      "luggageKg": 12,
+      "seatPreference": "Any",
+      "travelingWithChildren": false,
+      "loyaltyPoints": 0
+    }
+  ],
+  "seats": [
+    { "id": "F1", "type": "FAMILY", "occupied": false },
+    { "id": "E1", "type": "EMERGENCY_EXIT", "occupied": false }
+  ]
+}
